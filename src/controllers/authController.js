@@ -71,12 +71,14 @@ exports.login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
         
+        // Also send token in response
         res.json({ 
             user: { 
                 id: user._id, 
                 email: user.email, 
                 name: user.name 
-            }
+            },
+            token: token // Add token to response
         });
     } catch (error) {
         console.error('Login error:', error);
