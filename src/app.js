@@ -22,11 +22,11 @@ const server = http.createServer(app);
 
 // Setup WebSocket
 setupWebSocket(server);
-
+//https://mobishaala-frontend-6kwx.vercel.app
 // Middleware
 app.use(cookieParser());
 app.use(cors({
-  origin: 'https://mobishaala-frontend-6kwx.vercel.app',
+  origin: 'http://localhost:3000',
   credentials: true
 }));
 app.use(express.json());
