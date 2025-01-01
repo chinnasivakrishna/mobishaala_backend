@@ -1,15 +1,20 @@
 const JWT = require('jsonwebtoken');
 
-const auth = async (req, res, next) => {
+const auth = (req, res, next) => {
     try {
-        const token = req.cookies.token;
-        
-        if (!token) {
-            return res.status(401).json({ error: 'Authentication required' });
+        // Check for token in Authorization header first
+        const authHeader = req.headers.authorization;
+        let token;
+
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.split(' ')[1];
+        } else {
+            // Fallback to cookie
+            token = req.cookies.token;
         }
 
-        if (!process.env.JWT_SECRET) {
-            throw new Error('JWT_SECRET is not configured');
+        if (!token) {
+            return res.status(401).json({ error: 'Authentication required' });
         }
 
         const decoded = JWT.verify(token, process.env.JWT_SECRET);
