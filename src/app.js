@@ -26,7 +26,7 @@ setupWebSocket(server);
 // Middleware
 app.use(cookieParser());
 app.use(cors({
-  origin: 'https://cerulean-pastelito-d14121.netlify.app',
+  origin: 'https://mobishaala-frontend-6kwx.vercel.app',
   credentials: true
 }));
 app.use(express.json());
