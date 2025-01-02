@@ -26,10 +26,11 @@ const upload = multer({ storage });
 router.use(auth);
 
 // Room routes
-router.post('/', roomController.createRoom);
-router.get('/', roomController.getRooms);
-router.get('/:roomId', roomController.getRoom);
-router.post('/:roomId/token', roomController.generateToken);
+router.get('/', auth, roomController.getAllRooms);
+router.post('/', auth, roomController.createRoom);
+router.get('/:roomId', auth, roomController.getRoom);
+router.get('/:roomId/token', auth, roomController.getRoomToken);
+router.post('/:roomId/join', auth, roomController.joinRoom);
 
 // Recording routes
 router.post('/:roomId/recording/start', roomController.startRecording);
