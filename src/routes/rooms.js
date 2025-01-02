@@ -11,7 +11,7 @@ if (typeof authenticateToken !== 'function') {
 // Apply authentication middleware to all routes
 router.use(authenticateToken);
 
-// Define routes
+// Define routes with their controller functions
 router.post('/', roomController.createRoom);
 router.get('/', roomController.getRooms);
 router.get('/:id', roomController.getRoom);

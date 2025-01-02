@@ -1,28 +1,14 @@
 const mongoose = require('mongoose');
 
-const recordingSchema = new mongoose.Schema({
-  timestamp: {
-    type: Date,
-    required: true
-  },
-  filename: {
-    type: String,
-    required: true
-  },
-  duration: Number,
-  size: Number,
-  url: String
-});
-
 const roomSchema = new mongoose.Schema({
-    roomId: {
-        type: String,
-        required: true,
-        unique: true
-    },
     name: {
         type: String,
-        required: true
+        required: true,
+        trim: true
+    },
+    description: {
+        type: String,
+        trim: true
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
@@ -33,17 +19,10 @@ const roomSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    active: {
+    isActive: {
         type: Boolean,
         default: true
-    },
-    isRecording: {
-        type: Boolean,
-        default: false
-    },
-    recordingStartedAt: Date,
-    recordingStoppedAt: Date,
-    recordings: [recordingSchema]
+    }
 });
 
 module.exports = mongoose.model('Room', roomSchema); 
