@@ -2,6 +2,7 @@ const Room = require('../models/Room');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 
+
 exports.getAllRooms = async (req, res) => {
     try {
         const rooms = await Room.find()
