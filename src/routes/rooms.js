@@ -1,35 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const authenticateToken = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
+const roomController = require('../controllers/roomController');
 
-// Protected routes - all routes require authentication
+// All room routes require authentication
 router.use(authenticateToken);
 
-// Get all rooms
-router.get('/', async (req, res) => {
-    try {
-        res.json({ message: 'Get rooms endpoint' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
-// Create room
-router.post('/', async (req, res) => {
-    try {
-        res.json({ message: 'Create room endpoint' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
-// Get specific room
-router.get('/:roomId', async (req, res) => {
-    try {
-        res.json({ message: 'Get specific room endpoint' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
-    }
-});
+router.post('/', roomController.createRoom);
+router.get('/', roomController.getRooms);
+router.get('/:id', roomController.getRoom);
+router.post('/:id/token', roomController.getToken);
+router.post('/:id/recording/start', roomController.startRecording);
+router.post('/:id/recording/stop', roomController.stopRecording);
+router.post('/:id/recording/save', roomController.saveRecording);
 
 module.exports = router; 
