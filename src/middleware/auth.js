@@ -2,11 +2,11 @@ const jwt = require('jsonwebtoken');
 
 const auth = async (req, res, next) => {
     try {
-        // Get token from header
-        const token = req.header('Authorization')?.replace('Bearer ', '');
+        // Get token from cookie
+        const token = req.cookies.token;
         
         if (!token) {
-            return res.status(401).json({ error: 'No authentication token, access denied' });
+            return res.status(401).json({ error: 'Authentication required' });
         }
 
         try {
@@ -16,6 +16,7 @@ const auth = async (req, res, next) => {
             next();
         } catch (error) {
             console.error('Token verification failed:', error);
+            res.clearCookie('token');
             res.status(401).json({ error: 'Token is invalid or expired' });
         }
     } catch (error) {
