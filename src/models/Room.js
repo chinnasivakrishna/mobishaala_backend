@@ -24,6 +24,10 @@ const roomSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    hmsRoomId: {
+        type: String,
+        required: true
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -44,6 +48,6 @@ const roomSchema = new mongoose.Schema({
     recordingStartedAt: Date,
     recordingStoppedAt: Date,
     recordings: [recordingSchema]
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Room', roomSchema); 
