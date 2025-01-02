@@ -22,22 +22,26 @@ const server = http.createServer(app);
 
 // Setup WebSocket
 setupWebSocket(server);
-//https://mobishaala-frontend-6kwx.vercel.app
+
 // Middleware
 app.use(cookieParser());
 app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true
 }));
 app.use(express.json());
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Something went wrong!' });
+    console.error('Error:', err.stack);
+    res.status(err.status || 500).json({ 
+        error: err.message || 'Something went wrong!',
+        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
 });
 
 module.exports = { app, server }; 
