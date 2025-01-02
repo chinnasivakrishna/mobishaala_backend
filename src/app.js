@@ -11,7 +11,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
-        ? ['http://localhost:3000'] // Add your frontend URL when deployed
+        ? ['http://localhost:3000']
         : ['http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -23,17 +23,19 @@ app.get('/test', (req, res) => {
     res.json({ message: 'API is working' });
 });
 
-// Routes without /api prefix
-app.use('/auth', require('./routes/auth'));
-app.use('/rooms', require('./routes/rooms'));
+// Mount routes with /api prefix
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/rooms', require('./routes/rooms'));
 
-// Error handling middleware
+// Global error handler
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    console.error('Error:', err);
     res.status(500).json({ message: 'Something went wrong!' });
 });
 
-// Add OPTIONS handling for preflight requests
-app.options('*', cors());
+// Handle 404
+app.use((req, res) => {
+    res.status(404).json({ message: `Route ${req.url} not found` });
+});
 
 module.exports = { app, server }; 
