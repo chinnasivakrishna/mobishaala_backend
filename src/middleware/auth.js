@@ -1,23 +1,29 @@
-const jwt = require('jsonwebtoken');
+const JWT = require('jsonwebtoken');
 
-const authenticateToken = (req, res, next) => {
+const auth = (req, res, next) => {
     try {
-        const token = req.cookies.token;
-        
-        if (!token) {
-            return res.status(401).json({ message: 'Authentication required' });
+        // Check for token in Authorization header first
+        const authHeader = req.headers.authorization;
+        let token;
+
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.split(' ')[1];
+        } else {
+            // Fallback to cookie
+            token = req.cookies.token;
         }
 
-        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-            if (err) {
-                return res.status(403).json({ message: 'Invalid or expired token' });
-            }
-            req.user = user;
-            next();
-        });
+        if (!token) {
+            return res.status(401).json({ error: 'Authentication required' });
+        }
+
+        const decoded = JWT.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
     } catch (error) {
-        res.status(401).json({ message: 'Authentication failed' });
+        console.error('Auth middleware error:', error);
+        res.status(401).json({ error: 'Invalid token' });
     }
 };
 
-module.exports = authenticateToken; 
+module.exports = auth; 
