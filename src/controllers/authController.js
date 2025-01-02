@@ -22,7 +22,7 @@ exports.register = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
-
+        
         // Set HTTP-only cookie
         res.cookie('token', token, {
             httpOnly: true,
@@ -30,7 +30,7 @@ exports.register = async (req, res) => {
             sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
-        
+
         res.status(201).json({ 
             user: { 
                 id: user._id, 
@@ -62,7 +62,7 @@ exports.login = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
-
+        
         // Set HTTP-only cookie
         res.cookie('token', token, {
             httpOnly: true,
@@ -70,7 +70,7 @@ exports.login = async (req, res) => {
             sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
-        
+
         res.json({ 
             user: { 
                 id: user._id, 
@@ -86,11 +86,13 @@ exports.login = async (req, res) => {
 
 exports.logout = async (req, res) => {
     try {
+        // Clear the cookie
         res.clearCookie('token', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict'
         });
+        
         res.json({ message: 'Logged out successfully' });
     } catch (error) {
         console.error('Logout error:', error);
@@ -108,16 +110,32 @@ exports.refreshToken = async (req, res) => {
         }
 
         const token = JWT.sign(
-            { userId: user._id }, 
+            { 
+                userId: user._id,
+                email: user.email,
+                name: user.name
+            }, 
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
         
+        // Set new HTTP-only cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+
         res.json({ 
-            token,
-            expiresIn: '7 days'
+            user: {
+                id: user._id,
+                email: user.email,
+                name: user.name
+            }
         });
     } catch (error) {
+        console.error('Token refresh error:', error);
         res.status(500).json({ error: error.message });
     }
 }; 

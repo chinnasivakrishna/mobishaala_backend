@@ -1,23 +1,26 @@
-const JWT = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
 const auth = async (req, res, next) => {
     try {
-        const token = req.cookies.token;
+        // Get token from header
+        const token = req.header('Authorization')?.replace('Bearer ', '');
         
         if (!token) {
-            return res.status(401).json({ error: 'Authentication required' });
+            return res.status(401).json({ error: 'No authentication token, access denied' });
         }
 
-        if (!process.env.JWT_SECRET) {
-            throw new Error('JWT_SECRET is not configured');
+        try {
+            // Verify token
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = decoded;
+            next();
+        } catch (error) {
+            console.error('Token verification failed:', error);
+            res.status(401).json({ error: 'Token is invalid or expired' });
         }
-
-        const decoded = JWT.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-        next();
     } catch (error) {
         console.error('Auth middleware error:', error);
-        res.status(401).json({ error: 'Invalid token' });
+        res.status(500).json({ error: 'Server error' });
     }
 };
 
