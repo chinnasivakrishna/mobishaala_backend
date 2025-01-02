@@ -1,47 +1,33 @@
 const express = require('express');
 const cors = require('cors');
-const cookieParser = require('cookie-parser');
-const http = require('http');
+const mongoose = require('mongoose');
+require('dotenv').config();
 
 const app = express();
-const server = http.createServer(app);
 
 // Middleware
-app.use(cookieParser());
-app.use(express.json());
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' 
-        ? ['http://localhost:3000']
-        : ['http://localhost:3000'],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true
 }));
+app.use(express.json());
 
-// Root route for health check
-app.get('/', (req, res) => {
-    res.json({ message: 'Server is running' });
-});
+// Routes
+const authRoutes = require('./routes/auth');
+const roomRoutes = require('./routes/rooms');
 
-// Mount routes with /api prefix
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/rooms', require('./routes/rooms'));
-
-// Test route
-app.get('/api/test', (req, res) => {
-    res.json({ message: 'API is working' });
-});
+app.use('/api/auth', authRoutes);
+app.use('/api/rooms', roomRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Error:', err);
+    console.error(err.stack);
     res.status(500).json({ message: 'Something went wrong!' });
 });
 
-// Handle 404
+// 404 handler
 app.use((req, res) => {
-    console.log('404 for URL:', req.url);
     res.status(404).json({ message: `Route ${req.url} not found` });
 });
 
-module.exports = { app, server }; 
+module.exports = app; 

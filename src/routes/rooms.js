@@ -3,15 +3,18 @@ const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const roomController = require('../controllers/roomController');
 
-// All room routes require authentication
+// Make sure authenticateToken is a middleware function
+if (typeof authenticateToken !== 'function') {
+    throw new Error('authenticateToken must be a middleware function');
+}
+
+// Apply authentication middleware to all routes
 router.use(authenticateToken);
 
+// Define routes
 router.post('/', roomController.createRoom);
 router.get('/', roomController.getRooms);
 router.get('/:id', roomController.getRoom);
 router.post('/:id/token', roomController.getToken);
-router.post('/:id/recording/start', roomController.startRecording);
-router.post('/:id/recording/stop', roomController.stopRecording);
-router.post('/:id/recording/save', roomController.saveRecording);
 
 module.exports = router; 
