@@ -1,5 +1,6 @@
 const Room = require('../models/Room');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 
 exports.getAllRooms = async (req, res) => {
     try {
@@ -62,19 +63,23 @@ exports.getRoomToken = async (req, res) => {
             return res.status(404).json({ error: 'Room not found' });
         }
 
-        // Generate a room-specific token
-        const roomToken = jwt.sign(
+        // Generate HMS token
+        const response = await axios.post(
+            process.env.HMS_TOKEN_ENDPOINT,
             {
-                userId: req.user.userId,
-                roomId: room.roomId,
-                userEmail: req.user.email,
-                userName: req.user.name
+                room_id: room.roomId,
+                user_id: req.user.userId,
+                role: 'host', // or determine based on user role
             },
-            process.env.JWT_SECRET,
-            { expiresIn: '24h' }
+            {
+                headers: {
+                    'Authorization': `Bearer ${process.env.HMS_ACCESS_KEY}`,
+                    'Content-Type': 'application/json',
+                }
+            }
         );
 
-        res.json({ token: roomToken });
+        res.json({ token: response.data.token });
     } catch (error) {
         console.error('Error generating room token:', error);
         res.status(500).json({ error: 'Failed to generate room token' });
@@ -90,21 +95,43 @@ exports.joinRoom = async (req, res) => {
             return res.status(404).json({ error: 'Room not found' });
         }
 
-        // Generate a room-specific token
-        const roomToken = jwt.sign(
+        // Generate a management token for HMS API
+        const managementToken = jwt.sign(
             {
-                userId: req.user.userId,
-                roomId: room.roomId,
-                userEmail: req.user.email,
-                userName: req.user.name
+                access_key: process.env.HMS_ACCESS_KEY,
+                type: 'management',
+                version: 2,
+                iat: Math.floor(Date.now() / 1000),
+                exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60
             },
-            process.env.JWT_SECRET,
-            { expiresIn: '24h' }
+            process.env.HMS_SECRET
         );
+
+        // Get room token from HMS API
+        const response = await fetch('https://api.100ms.live/v2/token', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${managementToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                room_id: room.roomId,
+                user_id: req.user.userId,
+                role: 'host'
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            console.error('HMS API Error:', error);
+            throw new Error('Failed to generate HMS token');
+        }
+
+        const { token } = await response.json();
 
         res.json({
             room,
-            token: roomToken
+            token
         });
     } catch (error) {
         console.error('Error joining room:', error);
