@@ -18,24 +18,18 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Create router for /api routes
-const apiRouter = express.Router();
-
-// Test route
-apiRouter.get('/test', (req, res) => {
-    res.json({ message: 'API is working' });
-});
-
-// Mount auth and rooms routes on the API router
-apiRouter.use('/auth', require('./routes/auth'));
-apiRouter.use('/rooms', require('./routes/rooms'));
-
-// Mount the API router at /api
-app.use('/api', apiRouter);
-
-// Root route
+// Root route for health check
 app.get('/', (req, res) => {
     res.json({ message: 'Server is running' });
+});
+
+// Mount routes with /api prefix
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/rooms', require('./routes/rooms'));
+
+// Test route
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'API is working' });
 });
 
 // Error handling middleware
