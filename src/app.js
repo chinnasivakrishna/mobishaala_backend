@@ -18,16 +18,16 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Test route
-app.get('/test', (req, res) => {
+// Test route to verify API is working
+app.get('/', (req, res) => {
     res.json({ message: 'API is working' });
 });
 
-// Mount routes with /api prefix
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/rooms', require('./routes/rooms'));
+// Mount routes WITHOUT /api prefix
+app.use('/auth', require('./routes/auth'));
+app.use('/rooms', require('./routes/rooms'));
 
-// Global error handler
+// Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Error:', err);
     res.status(500).json({ message: 'Something went wrong!' });
@@ -35,6 +35,7 @@ app.use((err, req, res, next) => {
 
 // Handle 404
 app.use((req, res) => {
+    console.log('404 for URL:', req.url);
     res.status(404).json({ message: `Route ${req.url} not found` });
 });
 
